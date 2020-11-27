@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  version: 0.1.0
+  title: CUSports Cart API
+  description: An API for the Cart on an E-commerce store selling fan gear.
+
+servers:
+  - url: 'http://localhost:3000'
+
+paths:
+
+  /postCart/{CartID}:
+    post:
+      description: 'Adds an item to the cart'
+      parameters:
+          - $ref: '#/components/schemas/CartID'
+      requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/Item'
+      responses:
+            '200':
+                description: 'Succesfully added an item to the cart'
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          message:
+                              type: string
+            '400':
+                $ref: '#/components/responses/400Error'
+  /postCart:
+      post:
+        description: 'Adds an item to the cart'
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/Item'
+        responses:
+            '200':
+                description: 'Succesfully added an item to the cart'
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          message:
+                              type: string
+            '400':
+                $ref: '#/components/responses/400Error'
+  /getCart/{CartID}:
+    get:
+      description: 'Retrieves a list of items in the current cart'
+      parameters:
+          - $ref: '#/components/schemas/CartID'
+      responses:
+        '200':
+          description: 'Cart successfully retrieved'
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                    $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/400Error'
+
+  /postSavedCart/{CartID}/{UserID}:         
+    post:
+      description: 'Saves a specific cart to a specific user'
+      parameters:
+          - $ref: '#/components/schemas/CartID'
+          - $ref: '#/components/schemas/UserID'
+      requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/CartID'
+      responses:
+        '200':
+          description: 'Succesfully saved cart to user'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                      type: string
+        '400':
+                $ref: '#/components/responses/400Error'
+                
+  /postSavedCart/{UserID}:
+    post:
+        description: 'Saves a specific cart to a specific user'
+        parameters:
+          - $ref: '#/components/schemas/UserID'
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/items'
+        responses:
+            '200':
+                description: 'Succesfully added item cart to user'
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          message:
+                              type: string
+            '400':
+                $ref: '#/components/responses/400Error'
+
+  /postCartExpireTime:
+    post:
+        description: 'Adds a time that the cart will expire'
+        requestBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            ExpireTime:
+                                type: string
+        responses:
+            '200':
+                description: 'Scucessfully added expriry time to cart'
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                message:
+                                    type: string
+            '400':
+                $ref: '#/components/responses/400Error'
+
+  /getSavedCart/{UserID}:
+    get:
+      description: 'Retrieves a list of items in saved cart coresponding to UserID'
+      parameters:
+          - $ref: '#/components/schemas/UserID'
+      responses:
+        '200':
+          description: 'Cart successfully retrieved'
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/UserCart'
+        '400':
+                $ref: '#/components/responses/400Error'
+
+  /getExpiringCarts:
+    get:
+        description: 'Gets the saved carts that will expire in the next 3 hours'
+        requestBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            ExpireTime:
+                                type: string
+        responses:
+            '200':
+                description: 'Sucesfully got List of Carts expiering in the next 3 hours'
+                content:
+                    application/json:
+                        schema:
+                           type: array
+                           $ref: '#/components/schemas/UserCart'
+            '400':
+                           $ref: '#/components/responses/400Error'
+    
+
+components:
+  schemas:
+    UserID:
+        type: integer
+        format: int64
+    CartID:
+        type: integer
+        format: int64
+    UserCart:
+      type: object
+      required:
+        - UserID
+        - UCart
+        - expireTime
+      properties:
+        UserID:
+          type: integer
+          format: int64
+        UCart:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+        expireTime:
+            type: object
+            required:
+                - date
+                - hours
+                - min
+            properties:
+                date:
+                    type: string
+                hours:
+                    type: integer
+                    format: int32
+                min:
+                    type: integer
+                    format: int32
+
+    Cart:
+      type: object
+      required:
+        - CartID
+        - CartArray
+      properties:
+        CartID:
+          type: integer
+          format: int64
+        CartArray:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - price
+        - quantity
+        - stock
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        quantity:
+          type: integer
+          format: int32
+        stock:
+          type: integer
+          format: int64
+  responses:
+    400Error:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
